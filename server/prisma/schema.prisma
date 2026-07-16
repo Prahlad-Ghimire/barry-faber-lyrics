@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model song {
+  id        String   @id @default(cuid())
+  title     String
+  lyrics    String?  @default("")
+  isActive  Boolean  @default(false)
+  order     Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("songs")
+}
+
+model SiteConfig {
+  id           String  @id @default(cuid())
+  siteName     String  @default("BarryFaberLyrics.com")
+  aboutText    String? @default("")
+  contactEmail String? @default("")
+
+  @@map("site_config")
+}
+
+model Analytics {
+  id           String   @id @default(cuid())
+  passwordUsed String
+  dateAccessed DateTime @default(now())
+  songsClicked String[] @default([])
+
+  @@map("analytics")
+}
+
+model Password {
+  id        String   @id @default(cuid())
+  value     String   @unique
+  sessionId String   @default(cuid())
+  createdAt DateTime @default(now())
+
+  @@map("passwords")
+}
