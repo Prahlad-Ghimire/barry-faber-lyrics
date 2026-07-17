@@ -6,7 +6,10 @@ import ParticleBackground from '../components/ParticleBackground'
 import useMouseParallax from '../hooks/useMouseParallax'
 import axios from 'axios'
 
-const api = axios.create({ baseURL: '/api', withCredentials: true })
+// Dynamically use the Render backend URL or fall back to local host
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
+const api = axios.create({ baseURL: `${BACKEND_URL}/api`, withCredentials: true })
 
 function SongRow({ song, index, onClick }) {
   const ref = useRef(null)
