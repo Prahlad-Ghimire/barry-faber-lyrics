@@ -4,12 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, useInView } from 'framer-motion'
 import ParticleBackground from '../components/ParticleBackground'
 import useMouseParallax from '../hooks/useMouseParallax'
-import axios from 'axios'
-
-// Dynamically use the Render backend URL or fall back to local host
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-
-const api = axios.create({ baseURL: `${BACKEND_URL}/api`, withCredentials: true })
+import { getSongs, getSiteConfig } from '../api'
 
 function SongRow({ song, index, onClick }) {
   const ref = useRef(null)
@@ -92,10 +87,9 @@ export default function Home() {
     const load = async () => {
       try {
         const [songsRes, configRes] = await Promise.all([
-          api.get('/songs'),
-          api.get('/config'),
+          getSongs(),
+          getSiteConfig(),
         ])
-        // Prisma returns `id` — no _id in PostgreSQL
         setSongs(songsRes.data)
         if (configRes.data.siteName) setSiteName(configRes.data.siteName)
       } catch (err) {
@@ -115,7 +109,6 @@ export default function Home() {
   }, [navigate])
 
   const handleSongClick = (song) => {
-    // FIX: use song.id (Prisma) with song._id as fallback
     const id = song.id || song._id
     navigate(`/song/${id}`)
   }

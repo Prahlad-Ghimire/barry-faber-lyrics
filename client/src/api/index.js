@@ -1,10 +1,11 @@
 // client/src/api/index.js
 import axios from 'axios'
 
-// In development:  baseURL = '/api'  (proxied by Vite to localhost:5000)
-// In production:   baseURL = your Render backend URL (set in Vercel env vars)
+// Standardize the environment variable and ensure it appends /api correctly
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || '/api',
+    baseURL: BACKEND_URL.endsWith('/api') ? BACKEND_URL : `${BACKEND_URL}/api`,
     withCredentials: true,
 })
 
