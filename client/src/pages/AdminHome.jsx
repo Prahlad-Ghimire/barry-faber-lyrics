@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 
 // ── Axios helper with credentials ─────────────────
-// withCredentials: true ensures the session cookie is
-// sent with every request so adminAuth is recognised
+// Dynamically construct absolute URL using the Vercel environment variable
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 const api = (path, method = 'get', data) =>
-  axios({ method, url: `/api${path}`, data, withCredentials: true })
+  axios({ method, url: `${backendUrl}/api${path}`, data, withCredentials: true })
 
 // ── Admin nav bar ──────────────────────────────────
 function AdminNav({ navigate }) {
@@ -80,7 +80,6 @@ export default function AdminHome() {
         setSiteNameInput(configRes.data.siteName || '')
 
         // Merge DB songs into the 50-slot grid
-        // FIX: use found.id (Prisma/PostgreSQL) not found._id (MongoDB)
         const filled = Array(50).fill(null).map((_, i) => {
           const found = songsRes.data.find(s => s.order === i + 1)
           return found
@@ -89,7 +88,6 @@ export default function AdminHome() {
         })
         setSongs(filled)
       } catch (err) {
-        // Surface the real server error in the console for debugging
         console.error('Admin load error:', err.response?.status, err.response?.data)
       } finally {
         setLoading(false)
@@ -118,7 +116,6 @@ export default function AdminHome() {
     try {
       const res = await api('/songs', 'post', { title, order: slot })
 
-      // FIX: Prisma returns `id` not `_id` — was the root cause of the bug
       const newId = res.data.id
       setSongs(prev => prev.map(s =>
         s.slot === slot ? { ...s, _id: newId, isActive: false } : s
@@ -126,7 +123,6 @@ export default function AdminHome() {
       showToast(`"${title}" added`)
       navigate(`/admin/song/${newId}`)
     } catch (err) {
-      // Show the exact server message (e.g. "Slot already taken", "Admin unauthorized")
       const msg = err.response?.data?.message || 'Failed to add song'
       showToast(msg)
       console.error('Add song error:', err.response?.status, err.response?.data)
@@ -161,7 +157,6 @@ export default function AdminHome() {
       exit={{ opacity: 0 }}
       style={{ minHeight: '100vh', background: 'var(--dark)' }}
     >
-      {/* Subtle grid background */}
       <div style={{
         position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         backgroundImage: `
@@ -177,7 +172,6 @@ export default function AdminHome() {
         padding: '48px 24px 80px',
       }}>
 
-        {/* ── Page header ── */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -189,10 +183,8 @@ export default function AdminHome() {
           <div style={dividerStyle} />
         </motion.div>
 
-        {/* ── Navigation ── */}
         <AdminNav navigate={navigate} />
 
-        {/* ── Toast notification ── */}
         <AnimatePresence>
           {toast && (
             <motion.div
@@ -215,7 +207,6 @@ export default function AdminHome() {
           )}
         </AnimatePresence>
 
-        {/* ── Section: Website name ── */}
         <Section label="Website name">
           <div style={{ display: 'flex', gap: 10 }}>
             <input
@@ -232,7 +223,6 @@ export default function AdminHome() {
           </p>
         </Section>
 
-        {/* ── Section: Song titles ── */}
         <Section label="Song titles">
           <p style={hintStyle}>
             Add up to 50 song titles. Click{' '}
@@ -254,7 +244,6 @@ export default function AdminHome() {
                   transition={{ delay: i * 0.012, duration: 0.35 }}
                   style={{ display: 'flex', alignItems: 'center', gap: 10 }}
                 >
-                  {/* Slot number */}
                   <span style={{
                     width: 28, flexShrink: 0, textAlign: 'right',
                     fontFamily: 'sans-serif', fontSize: '0.72rem',
@@ -263,7 +252,6 @@ export default function AdminHome() {
                     {song.slot}
                   </span>
 
-                  {/* Title input — disabled once saved */}
                   <input
                     value={song.title}
                     onChange={e => handleSongTitleChange(song.slot, e.target.value)}
@@ -280,7 +268,6 @@ export default function AdminHome() {
                     }}
                   />
 
-                  {/* Action button — Add or Edit Lyrics */}
                   {song._id ? (
                     <ActionBtn onClick={() => navigate(`/admin/song/${song._id}`)}>
                       Edit Lyrics
@@ -291,7 +278,6 @@ export default function AdminHome() {
                     </ActionBtn>
                   )}
 
-                  {/* Active / Draft badge */}
                   {song._id && (
                     <span style={{
                       fontSize: '0.7rem',
@@ -309,7 +295,6 @@ export default function AdminHome() {
           )}
         </Section>
 
-        {/* ── Section: Add password ── */}
         <Section label="Add password">
           <p style={hintStyle}>
             Typing in a password &amp; clicking Add creates a new password
@@ -333,7 +318,6 @@ export default function AdminHome() {
   )
 }
 
-// ── Reusable section wrapper ───────────────────────
 function Section({ label, children }) {
   return (
     <motion.div
@@ -359,7 +343,6 @@ function Section({ label, children }) {
   )
 }
 
-// ── Reusable action button ─────────────────────────
 function ActionBtn({ onClick, children, danger }) {
   return (
     <motion.button
@@ -387,7 +370,6 @@ function ActionBtn({ onClick, children, danger }) {
   )
 }
 
-// ── Style constants ────────────────────────────────
 const inputStyle = {
   padding: '9px 14px',
   background: 'rgba(255,255,255,0.04)',
