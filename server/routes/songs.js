@@ -1,7 +1,7 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-const router = express.Router();
+const router = Router();
 const prisma = new PrismaClient();
 
 // Utility function to convert "Song Title Here!" into "song-title-here"
@@ -54,4 +54,4 @@ router.get('/songs/:slug', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;
