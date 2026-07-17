@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+const express = require('express');
+const { PrismaClient } = require('@prisma/client');
 
-const router = Router();
+const router = express.Router();
 const prisma = new PrismaClient();
 
 // Utility function to convert "Song Title Here!" into "song-title-here"
@@ -25,7 +25,7 @@ router.post('/songs', async (req, res) => {
                 title,
                 order: parseInt(order, 10),
                 lyrics: lyrics || "",
-                slug: slugify(title), // 👈 Generates and saves the clean URL slug
+                slug: slugify(title),
             },
         });
 
@@ -41,7 +41,7 @@ router.get('/songs/:slug', async (req, res) => {
         const { slug } = req.params;
 
         const song = await prisma.song.findUnique({
-            where: { slug: slug }, // 👈 Queries by the slug text string instead of CUID
+            where: { slug: slug },
         });
 
         if (!song) {
@@ -54,4 +54,4 @@ router.get('/songs/:slug', async (req, res) => {
     }
 });
 
-export default router;
+module.exports = router;
