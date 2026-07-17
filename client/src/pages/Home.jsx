@@ -109,8 +109,7 @@ export default function Home() {
   }, [navigate])
 
   const handleSongClick = (song) => {
-    const id = song.id || song._id
-    navigate(`/song/${id}`)
+    navigate(`/song/${song.slug}`);
   }
 
   return (
