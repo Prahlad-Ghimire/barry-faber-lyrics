@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, scale } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from "axios";
 
 export default function AdminLogin() {
@@ -16,14 +16,18 @@ export default function AdminLogin() {
     setLoading(true)
     setError('')
 
+    // 1. Grab the backend URL from Vite's environment variables, or fall back to localhost
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
     try {
-      const res = await axios.post('/api/auth/admin', { password }, { withCredentials: true })
+      // 2. Make the request using the full absolute path to your backend
+      const res = await axios.post(`${backendUrl}/api/auth/admin`, { password }, { withCredentials: true })
 
       if (res.data.success) {
         sessionStorage.setItem('adminAuth', 'true')
         navigate('/admin')
       }
-    } catch {
+    } catch (err) {
       setError('Incorrect administrator password.')
       setPassword('')
     } finally {
