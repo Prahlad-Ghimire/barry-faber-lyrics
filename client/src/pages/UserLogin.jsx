@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 
+// Define the backend URL pointing to your Render app (or falling back to localhost)
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 // --- Particle system ---
 function useParticles(canvasRef) {
     useEffect(() => {
@@ -130,9 +133,9 @@ export default function UserLogin() {
 
     useParticles(canvasRef)
 
-    // Fetch site name from backend
+    // Fetch site name from backend (Updated URL)
     useEffect(() => {
-        axios.get('/api/config/sitename')
+        axios.get(`${BACKEND_URL}/api/config/sitename`)
             .then(res => { if (res.data.name) setSiteName(res.data.name) })
             .catch(() => { }) // use default if offline
     }, [])
@@ -143,13 +146,15 @@ export default function UserLogin() {
         setLoading(true)
         setError('')
         try {
-            const res = await axios.post('/api/auth/user', { password })
+            // Updated endpoint to use the correct Render URL and pass credentials
+            const res = await axios.post(`${BACKEND_URL}/api/auth/user`, { password }, { withCredentials: true })
             if (res.data.success) {
                 sessionStorage.setItem('userAuth', 'true')
                 navigate('/home')
             }
-        } catch {
-            setError('Incorrect password. Please try again.')
+        } catch (err) {
+            // Checks if backend sent a specific failure message, otherwise uses default
+            setError(err.response?.data?.message || 'Incorrect password. Please try again.')
             setPassword('')
         } finally {
             setLoading(false)
