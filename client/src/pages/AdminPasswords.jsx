@@ -1,9 +1,11 @@
-import { useState, useEffect, Children } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, color } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from "axios";
 
-const api = (path, method = 'get', data) => axios({ method, url: `/api${path}`, data, withCredentials: true })
+// Dynamically construct absolute URL using the Vercel environment variable
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const api = (path, method = 'get', data) => axios({ method, url: `${backendUrl}/api${path}`, data, withCredentials: true })
 
 export default function AdminPassword() {
   const navigate = useNavigate()
@@ -145,7 +147,7 @@ export default function AdminPassword() {
               background: 'rgba(18,18,26,0.95)',
               border: '1px solid rgba(201,168,76,0.3)',
               borderRadius: 8, padding: '10px 18px',
-              color: '#e8c97a', fontFamily: "'Georgria', serif", fontSize: '0.85rem',
+              color: '#e8c97a', fontFamily: "'Georgia', serif", fontSize: '0.85rem',
             }}
           >
             {toast}
