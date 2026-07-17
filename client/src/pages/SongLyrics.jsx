@@ -1,9 +1,9 @@
+// client/src/pages/SongLyrics.jsx
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, useInView, useScroll, useTransform } from 'framer-motion'
 import ParticleBackground from "../components/ParticleBackground";
 import { getSong, trackSongClick } from "../api";
-
 
 function parseLyrics(raw) {
   if (!raw) return []
@@ -24,7 +24,7 @@ function parseLyrics(raw) {
     }
   }
   if (current) sections.push(current)
-  return sections.filter(s => s.lines.some(l => l.trim))
+  return sections.filter(s => s.lines.some(l => l.trim()))
 }
 
 function LyricsSection({ section, index }) {
@@ -37,7 +37,7 @@ function LyricsSection({ section, index }) {
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{
-        delay: index * 0.88,
+        delay: index * 0.08,
         duration: 0.75,
         ease: [0.22, 1, 0.36, 1],
       }}
@@ -56,7 +56,6 @@ function LyricsSection({ section, index }) {
           }}
         >
           <div style={{ width: 16, height: 1, background: '#c9a84c', opacity: 0.6 }} />
-
           <span style={{
             fontFamily: 'sans-serif',
             fontSize: '0.7rem',
@@ -71,7 +70,7 @@ function LyricsSection({ section, index }) {
       )}
 
       <div style={{
-        fontFamily: "'Georgia, serif'",
+        fontFamily: "'Georgia', serif",
         fontSize: '1.05rem',
         lineHeight: 1.9,
         color: 'rgba(255,255,255,0.78)',
@@ -105,28 +104,33 @@ export default function SongLyrics() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
-
   const containerRef = useRef(null)
   const { scrollY } = useScroll()
   const bgY = useTransform(scrollY, [0, 600], [0, -80])
 
-
   useEffect(() => {
     const load = async () => {
       try {
+        setLoading(true)
+        setError(false)
+        console.log("Fetching song with ID:", id) // Debug check
         const res = await getSong(id)
-        setSong(res.data)
 
-        trackSongClick(id).catch(() => { })
-      } catch {
+        if (res.data) {
+          setSong(res.data)
+          trackSongClick(id).catch(() => { })
+        } else {
+          setError(true)
+        }
+      } catch (err) {
+        console.error("Error loading lyrics page:", err.response?.status, err.response?.data || err.message)
         setError(true)
       } finally {
         setLoading(false)
       }
     }
-    load()
+    if (id) load()
   }, [id])
-
 
   const sections = song ? parseLyrics(song.lyrics) : []
 
@@ -144,7 +148,6 @@ export default function SongLyrics() {
     >
       <ParticleBackground count={45} opacity={0.2} />
 
-
       <motion.div
         style={{
           position: 'fixed',
@@ -158,7 +161,7 @@ export default function SongLyrics() {
           position: 'absolute',
           width: 600, height: 600,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(201,168,76,0.05)0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%)',
           top: '20%', right: '-15%',
         }} />
       </motion.div>
@@ -249,7 +252,7 @@ export default function SongLyrics() {
                 lineHeight: 1.25,
                 marginBottom: 0
               }}>
-                {song.title.split(' ').map((word, i) => (
+                {song?.title?.split(' ').map((word, i) => (
                   <motion.span
                     key={i}
                     initial={{ opacity: 0, y: 16 }}
@@ -287,7 +290,7 @@ export default function SongLyrics() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   style={{
-                    fontFamily: "'Geogria', serif",
+                    fontFamily: "'Georgia', serif",
                     color: 'rgba(255,255,255,0.3)',
                     fontStyle: 'italic'
                   }}
@@ -323,7 +326,6 @@ export default function SongLyrics() {
           </>
         )}
       </div>
-
     </motion.div >
   )
 }
