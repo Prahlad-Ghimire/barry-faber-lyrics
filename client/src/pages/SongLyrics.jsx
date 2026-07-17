@@ -98,7 +98,7 @@ function LyricsSection({ section, index }) {
 }
 
 export default function SongLyrics() {
-  const { id } = useParams()
+  const { slug } = useParams() // 👈 Read 'slug' instead of 'id'
   const navigate = useNavigate()
   const [song, setSong] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -113,24 +113,26 @@ export default function SongLyrics() {
       try {
         setLoading(true)
         setError(false)
-        console.log("Fetching song with ID:", id) // Debug check
-        const res = await getSong(id)
+
+        // Pass the URL text slug directly to your API layer
+        const res = await getSong(slug)
 
         if (res.data) {
           setSong(res.data)
-          trackSongClick(id).catch(() => { })
+          // Keep internal metrics reporting tied to the actual row record database ID
+          trackSongClick(res.data.id).catch(() => { })
         } else {
           setError(true)
         }
       } catch (err) {
-        console.error("Error loading lyrics page:", err.response?.status, err.response?.data || err.message)
+        console.error("Lyrics retrieval failed:", err)
         setError(true)
       } finally {
         setLoading(false)
       }
     }
-    if (id) load()
-  }, [id])
+    if (slug) load()
+  }, [slug])
 
   const sections = song ? parseLyrics(song.lyrics) : []
 

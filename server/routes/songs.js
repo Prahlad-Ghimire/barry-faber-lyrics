@@ -4,7 +4,6 @@ import { PrismaClient } from '@prisma/client';
 const router = Router();
 const prisma = new PrismaClient();
 
-// Utility function to convert "Song Title Here!" into "song-title-here"
 const slugify = (text) => {
     return text
         .toString()
@@ -15,11 +14,9 @@ const slugify = (text) => {
         .replace(/\-\-+/g, '-');
 };
 
-// ── CREATE NEW SONG ──────────────────────────────────
 router.post('/songs', async (req, res) => {
     try {
         const { title, order, lyrics } = req.body;
-
         const newSong = await prisma.song.create({
             data: {
                 title,
@@ -28,26 +25,21 @@ router.post('/songs', async (req, res) => {
                 slug: slugify(title),
             },
         });
-
         res.status(201).json(newSong);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ── FETCH SINGLE SONG BY SLUG ────────────────────────
 router.get('/songs/:slug', async (req, res) => {
     try {
         const { slug } = req.params;
-
         const song = await prisma.song.findUnique({
             where: { slug: slug },
         });
-
         if (!song) {
             return res.status(404).json({ error: 'Song not found' });
         }
-
         res.json(song);
     } catch (err) {
         res.status(500).json({ error: err.message });
